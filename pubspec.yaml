@@ -1,0 +1,48 @@
+name: fitness_training_app
+description: "Aesthetic fitness training & meal planning mobile app."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State management
+  provider: ^6.1.2
+
+  # Local persistence (offline-first, NFR-10)
+  shared_preferences: ^2.3.2
+
+  # Local notifications for workout/meal alerts (FR-5.x)
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.9.4
+
+  # Charts for progress/analytics (FR-4.5)
+  fl_chart: ^0.69.2
+
+  # Subscriptions via StoreKit / Play Billing (FR-6.x)
+  in_app_purchase: ^3.2.0
+
+  # Progress photos (FR-4.4)
+  image_picker: ^1.1.2
+
+  # Opens platform "Manage Subscription" screens (FR-6.7)
+  url_launcher: ^6.3.1
+
+  # Formatting / ids
+  intl: ^0.19.0
+  uuid: ^4.5.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
