@@ -39,6 +39,9 @@ dependencies:
   intl: ^0.19.0
   uuid: ^4.5.1
 
+  # Reads the device's IANA time zone so reminders respect it (FR-5.4)
+  flutter_timezone: ^5.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

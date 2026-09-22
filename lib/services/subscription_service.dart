@@ -27,34 +27,76 @@ class SubscriptionService {
   static const Set<String> productIds = {monthlySubscriptionProductId};
   static const int freeTrialDays = 7;
 
-  final InAppPurchase _iap = InAppPurchase.instance;
+  InAppPurchase? _iapInstance;
+  bool _platformUnavailable = false;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
 
   void Function(PurchaseDetails details)? onPurchaseVerified;
   void Function(PurchaseDetails details)? onPurchaseFailed;
   void Function()? onPurchaseRestored;
 
-  Future<bool> get isStoreAvailable => _iap.isAvailable();
+  /// `InAppPurchase.instance` throws if no platform billing implementation
+  /// registered itself (expected on Android/iOS, where the plugin does this
+  /// automatically — but must never be allowed to crash the whole app on
+  /// startup if it somehow doesn't).
+  InAppPurchase? get _iap {
+    if (_platformUnavailable) return null;
+    try {
+      return _iapInstance ??= InAppPurchase.instance;
+    } catch (_) {
+      _platformUnavailable = true;
+      return null;
+    }
+  }
+
+  Future<bool> get isStoreAvailable async {
+    final iap = _iap;
+    if (iap == null) return false;
+    try {
+      return await iap.isAvailable();
+    } catch (_) {
+      return false;
+    }
+  }
 
   void startListening() {
-    _subscription = _iap.purchaseStream.listen(
-      _handlePurchaseUpdates,
-      onError: (_) {},
-    );
+    final iap = _iap;
+    if (iap == null) return;
+    try {
+      _subscription = iap.purchaseStream.listen(
+        _handlePurchaseUpdates,
+        onError: (_) {},
+      );
+    } catch (_) {
+      // Billing channel unavailable — subscription features stay gated
+      // behind the free-trial path instead of crashing app startup.
+    }
   }
 
   Future<List<ProductDetails>> queryProducts() async {
-    if (!await isStoreAvailable) return [];
-    final response = await _iap.queryProductDetails(productIds);
-    return response.productDetails;
+    final iap = _iap;
+    if (iap == null) return [];
+    try {
+      if (!await iap.isAvailable()) return [];
+      final response = await iap.queryProductDetails(productIds);
+      return response.productDetails;
+    } catch (_) {
+      return [];
+    }
   }
 
   Future<void> buySubscription(ProductDetails product) async {
+    final iap = _iap;
+    if (iap == null) throw StateError('Billing is unavailable on this device.');
     final param = PurchaseParam(productDetails: product);
-    await _iap.buyNonConsumable(purchaseParam: param);
+    await iap.buyNonConsumable(purchaseParam: param);
   }
 
-  Future<void> restorePurchases() => _iap.restorePurchases();
+  Future<void> restorePurchases() async {
+    final iap = _iap;
+    if (iap == null) throw StateError('Billing is unavailable on this device.');
+    await iap.restorePurchases();
+  }
 
   void _handlePurchaseUpdates(List<PurchaseDetails> purchases) async {
     for (final purchase in purchases) {
@@ -79,7 +121,7 @@ class SubscriptionService {
           break;
       }
       if (purchase.pendingCompletePurchase) {
-        await _iap.completePurchase(purchase);
+        await _iap?.completePurchase(purchase);
       }
     }
   }

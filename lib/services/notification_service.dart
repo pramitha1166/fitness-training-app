@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -19,6 +20,7 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
   bool _initialized = false;
+  bool _pluginReady = false;
 
   static const _workoutChannel = AndroidNotificationDetails(
     'workout_reminders',
@@ -46,11 +48,14 @@ class NotificationService {
 
   Future<void> init() async {
     if (_initialized) return;
+    _initialized = true;
     tz_data.initializeTimeZones();
     try {
-      tz.setLocalLocation(tz.local);
+      final deviceTimeZone = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(deviceTimeZone.identifier));
     } catch (_) {
       // Falls back to UTC if the platform can't resolve the local zone.
+      tz.setLocalLocation(tz.UTC);
     }
 
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -59,10 +64,24 @@ class NotificationService {
       requestBadgePermission: true,
       requestSoundPermission: true,
     );
-    await _plugin.initialize(
-      const InitializationSettings(android: androidInit, iOS: iosInit),
+    const linuxInit = LinuxInitializationSettings(
+      defaultActionName: 'Open notification',
     );
-    _initialized = true;
+    try {
+      await _plugin.initialize(
+        const InitializationSettings(
+          android: androidInit,
+          iOS: iosInit,
+          linux: linuxInit,
+        ),
+      );
+    } catch (_) {
+      // Notification channel unavailable on this platform/environment
+      // (e.g. no D-Bus session on a headless Linux host) — the rest of the
+      // app must keep working without local reminders.
+      return;
+    }
+    _pluginReady = true;
   }
 
   Future<bool> requestPermissions() async {
@@ -119,6 +138,7 @@ class NotificationService {
       slot.startMinute,
     ).subtract(leadAdjusted);
 
+    if (!_pluginReady) return;
     await _plugin.zonedSchedule(
       id,
       title,
@@ -175,6 +195,7 @@ class NotificationService {
   /// FR-5.5: notify if a scheduled item wasn't logged within a grace period.
   Future<void> showMissedActivityAlert({required String activityLabel}) async {
     await init();
+    if (!_pluginReady) return;
     await _plugin.show(
       DateTime.now().millisecondsSinceEpoch.remainder(100000),
       'You missed $activityLabel',
@@ -192,6 +213,7 @@ class NotificationService {
     required String body,
   }) async {
     await init();
+    if (!_pluginReady) return;
     await _plugin.show(
       DateTime.now().millisecondsSinceEpoch.remainder(100000),
       title,
@@ -205,6 +227,7 @@ class NotificationService {
 
   Future<void> cancelAll() async {
     await init();
+    if (!_pluginReady) return;
     await _plugin.cancelAll();
   }
 
