@@ -1,5 +1,6 @@
 import '../models/enums.dart';
 import '../models/exercise.dart';
+import '../models/pose_type.dart';
 
 /// In-house aesthetic/physique-oriented exercise library (NFR-12: manageable
 /// without app redeployment in a full backend; seeded locally for now).
@@ -10,6 +11,7 @@ class ExerciseLibrary {
     // Chest
     const Exercise(
       id: 'ex_bench_press',
+      poseType: PoseType.press,
       name: 'Barbell Bench Press',
       muscleGroup: MuscleGroup.chest,
       description: 'Flat barbell press for overall chest mass and width.',
@@ -18,6 +20,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_incline_db_press',
+      poseType: PoseType.press,
       name: 'Incline Dumbbell Press',
       muscleGroup: MuscleGroup.chest,
       description: 'Targets the upper chest for a fuller, rounded look.',
@@ -26,6 +29,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_pushup',
+      poseType: PoseType.press,
       name: 'Push-Up',
       muscleGroup: MuscleGroup.chest,
       description:
@@ -39,6 +43,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_cable_flye',
+      poseType: PoseType.press,
       name: 'Cable Chest Flye',
       muscleGroup: MuscleGroup.chest,
       description:
@@ -49,6 +54,7 @@ class ExerciseLibrary {
     // Back
     const Exercise(
       id: 'ex_pullup',
+      poseType: PoseType.pull,
       name: 'Pull-Up',
       muscleGroup: MuscleGroup.back,
       description: 'Builds the V-taper width every aesthetic physique needs.',
@@ -57,6 +63,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_bent_row',
+      poseType: PoseType.pull,
       name: 'Bent-Over Barbell Row',
       muscleGroup: MuscleGroup.back,
       description: 'Thickness builder for the mid-back.',
@@ -65,6 +72,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_lat_pulldown',
+      poseType: PoseType.pull,
       name: 'Lat Pulldown',
       muscleGroup: MuscleGroup.back,
       description: 'Machine alternative to pull-ups for lat width.',
@@ -73,6 +81,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_superman_row',
+      poseType: PoseType.pull,
       name: 'Dumbbell Renegade Row',
       muscleGroup: MuscleGroup.back,
       description: 'Back + core builder usable with minimal equipment.',
@@ -82,6 +91,7 @@ class ExerciseLibrary {
     // Shoulders
     const Exercise(
       id: 'ex_ohp',
+      poseType: PoseType.press,
       name: 'Overhead Press',
       muscleGroup: MuscleGroup.shoulders,
       description: 'Builds round, capped delts for a wider upper body.',
@@ -90,6 +100,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_lateral_raise',
+      poseType: PoseType.lateralRaise,
       name: 'Dumbbell Lateral Raise',
       muscleGroup: MuscleGroup.shoulders,
       description: 'Isolation for shoulder width and the "capped delt" look.',
@@ -98,6 +109,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_pike_pushup',
+      poseType: PoseType.press,
       name: 'Pike Push-Up',
       muscleGroup: MuscleGroup.shoulders,
       description: 'Bodyweight shoulder builder.',
@@ -107,6 +119,7 @@ class ExerciseLibrary {
     // Arms
     const Exercise(
       id: 'ex_bicep_curl',
+      poseType: PoseType.curl,
       name: 'Dumbbell Bicep Curl',
       muscleGroup: MuscleGroup.arms,
       description: 'Classic bicep peak builder.',
@@ -115,6 +128,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_tricep_dip',
+      poseType: PoseType.dip,
       name: 'Tricep Dip',
       muscleGroup: MuscleGroup.arms,
       description: 'Builds tricep horseshoe using bodyweight or a bench.',
@@ -127,6 +141,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_close_grip_pushup',
+      poseType: PoseType.press,
       name: 'Close-Grip Push-Up',
       muscleGroup: MuscleGroup.arms,
       description: 'Tricep-focused bodyweight press.',
@@ -136,6 +151,7 @@ class ExerciseLibrary {
     // Legs
     const Exercise(
       id: 'ex_squat',
+      poseType: PoseType.squat,
       name: 'Barbell Back Squat',
       muscleGroup: MuscleGroup.legs,
       description: 'The foundation for leg size and overall proportion.',
@@ -144,6 +160,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_goblet_squat',
+      poseType: PoseType.squat,
       name: 'Goblet Squat',
       muscleGroup: MuscleGroup.legs,
       description: 'Home-friendly squat variation for quads and glutes.',
@@ -152,6 +169,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_bodyweight_squat',
+      poseType: PoseType.squat,
       name: 'Bodyweight Squat',
       muscleGroup: MuscleGroup.legs,
       description:
@@ -161,6 +179,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_lunge',
+      poseType: PoseType.lunge,
       name: 'Walking Lunge',
       muscleGroup: MuscleGroup.legs,
       description: 'Unilateral leg work that improves symmetry.',
@@ -174,6 +193,7 @@ class ExerciseLibrary {
     // Glutes
     const Exercise(
       id: 'ex_hip_thrust',
+      poseType: PoseType.hinge,
       name: 'Barbell Hip Thrust',
       muscleGroup: MuscleGroup.glutes,
       description: 'The most effective glute-builder for a rounded aesthetic.',
@@ -182,6 +202,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_glute_bridge',
+      poseType: PoseType.hinge,
       name: 'Glute Bridge',
       muscleGroup: MuscleGroup.glutes,
       description: 'Bodyweight/home glute activation and growth.',
@@ -194,6 +215,7 @@ class ExerciseLibrary {
     // Core
     const Exercise(
       id: 'ex_plank',
+      poseType: PoseType.core,
       name: 'Plank',
       muscleGroup: MuscleGroup.core,
       description: 'Core stability and a flatter, tighter midsection.',
@@ -206,6 +228,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_hanging_leg_raise',
+      poseType: PoseType.core,
       name: 'Hanging Leg Raise',
       muscleGroup: MuscleGroup.core,
       description: 'Lower-ab definition builder.',
@@ -214,6 +237,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_bicycle_crunch',
+      poseType: PoseType.core,
       name: 'Bicycle Crunch',
       muscleGroup: MuscleGroup.core,
       description: 'Obliques and ab definition, no equipment needed.',
@@ -223,6 +247,7 @@ class ExerciseLibrary {
     // Full body / conditioning
     const Exercise(
       id: 'ex_burpee',
+      poseType: PoseType.cardio,
       name: 'Burpee',
       muscleGroup: MuscleGroup.fullBody,
       description: 'Full-body conditioning to support fat loss and definition.',
@@ -235,6 +260,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_kb_swing',
+      poseType: PoseType.cardio,
       name: 'Kettlebell Swing',
       muscleGroup: MuscleGroup.fullBody,
       description: 'Posterior-chain conditioning and calorie burn.',
@@ -243,6 +269,7 @@ class ExerciseLibrary {
     ),
     const Exercise(
       id: 'ex_mountain_climber',
+      poseType: PoseType.cardio,
       name: 'Mountain Climbers',
       muscleGroup: MuscleGroup.fullBody,
       description: 'Bodyweight cardio/core finisher.',

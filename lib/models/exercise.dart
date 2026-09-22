@@ -1,4 +1,5 @@
 import 'enums.dart';
+import 'pose_type.dart';
 
 /// A library exercise definition (content-managed, NFR-12).
 class Exercise {
@@ -7,6 +8,7 @@ class Exercise {
   final MuscleGroup muscleGroup;
   final String description;
   final String mediaAsset; // icon/illustration key used by the UI
+  final PoseType poseType; // selects the animated illustration (FR-2.3)
   final List<EquipmentAccess> requiresEquipment;
 
   const Exercise({
@@ -15,6 +17,7 @@ class Exercise {
     required this.muscleGroup,
     required this.description,
     required this.mediaAsset,
+    required this.poseType,
     required this.requiresEquipment,
   });
 }

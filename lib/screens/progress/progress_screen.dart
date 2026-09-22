@@ -6,10 +6,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/enums.dart';
 import '../../models/progress_log.dart';
+import '../../models/workout_session.dart';
 import '../../providers/plan_provider.dart';
 import '../../providers/progress_provider.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/progress_ring.dart';
 
 /// FR-4.1-FR-4.6: adherence, body metrics, progress photos, trend charts.
 class ProgressScreen extends StatelessWidget {
@@ -24,10 +28,14 @@ class ProgressScreen extends StatelessWidget {
       plan.weeklyWorkoutAdherence,
       plan.weeklyMealAdherence,
     );
+    final sessions = plan.workoutPlan?.sessions ?? const <WorkoutSession>[];
+    final completed = sessions
+        .where((s) => s.status == LogStatus.completed)
+        .length;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Progress'),
+        title: const Text('My Activity'),
         automaticallyImplyLeading: false,
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -38,7 +46,9 @@ class ProgressScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
         children: [
-          if (lowAdherence)
+          const _WeekStrip(),
+          const SizedBox(height: 16),
+          if (lowAdherence) ...[
             Card(
               color: Theme.of(context).colorScheme.errorContainer,
               child: const Padding(
@@ -56,7 +66,109 @@ class ProgressScreen extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+          ],
+          Row(
+            children: [
+              Expanded(
+                child: _StatTile(
+                  icon: Icons.monitor_weight_outlined,
+                  iconColor: AppTheme.secondary,
+                  label: 'Weight',
+                  value: weightHistory.isEmpty
+                      ? '—'
+                      : weightHistory.last.weightKg!.toStringAsFixed(1),
+                  unit: 'kg',
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _StatTile(
+                  icon: Icons.local_drink_outlined,
+                  iconColor: const Color(0xFF5B8DEF),
+                  label: 'Check-ins',
+                  value: '${progress.logs.length}',
+                  unit: 'logged',
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.mint.withValues(alpha: 0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.emoji_events_outlined,
+                      color: AppTheme.greenDark,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Completed $completed of ${sessions.length} workouts',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        Text(
+                          'Keep going to build your streak',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (sessions.isNotEmpty)
+                    ProgressRing(
+                      progress: sessions.isEmpty
+                          ? 0
+                          : completed / sessions.length,
+                      size: 44,
+                      trackColor: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      valueColor: AppTheme.green,
+                      textColor: Theme.of(context).colorScheme.onSurface,
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Weekly training time',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 200,
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 20, 12, 12),
+                child: sessions.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'Add workout availability to see this chart.',
+                        ),
+                      )
+                    : _WeeklyMinutesChart(sessions: sessions),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
           Text('Weight trend', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
           SizedBox(
@@ -292,6 +404,192 @@ class ProgressScreen extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _WeekStrip extends StatelessWidget {
+  const _WeekStrip();
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    final scheme = Theme.of(context).colorScheme;
+
+    return SizedBox(
+      height: 40,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: 7,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (ctx, i) {
+          final day = monday.add(Duration(days: i));
+          final isToday =
+              day.year == now.year &&
+              day.month == now.month &&
+              day.day == now.day;
+          if (isToday) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppTheme.ink,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Center(
+                child: Text(
+                  'Today, ${DateFormat.MMMd().format(day)}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            );
+          }
+          return SizedBox(
+            width: 36,
+            child: Center(
+              child: Text(
+                '${day.day}',
+                style: TextStyle(
+                  color: scheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _StatTile extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final String value;
+  final String unit;
+
+  const _StatTile({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.value,
+    required this.unit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 18, color: iconColor),
+                const SizedBox(width: 6),
+                Text(label, style: Theme.of(context).textTheme.bodyMedium),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(value, style: Theme.of(context).textTheme.headlineSmall),
+                const SizedBox(width: 4),
+                Text(
+                  unit,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WeeklyMinutesChart extends StatelessWidget {
+  final List<WorkoutSession> sessions;
+  const _WeeklyMinutesChart({required this.sessions});
+
+  @override
+  Widget build(BuildContext context) {
+    final today = WeekDayX.fromDateTimeWeekday(DateTime.now().weekday);
+    final minutesByDay = <WeekDay, int>{for (final d in WeekDay.values) d: 0};
+    for (final s in sessions) {
+      minutesByDay[s.slot.day] =
+          (minutesByDay[s.slot.day] ?? 0) + s.estimatedDurationMinutes;
+    }
+    final maxY = (minutesByDay.values.fold<int>(
+      10,
+      (m, v) => v > m ? v : m,
+    )).toDouble();
+
+    return BarChart(
+      BarChartData(
+        maxY: maxY * 1.2,
+        gridData: const FlGridData(show: false),
+        borderData: FlBorderData(show: false),
+        titlesData: FlTitlesData(
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          leftTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (value, meta) {
+                final day = WeekDay.values[value.toInt()];
+                return Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    day.label.substring(0, 3),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: day == today
+                          ? FontWeight.w800
+                          : FontWeight.w400,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        barGroups: [
+          for (var i = 0; i < WeekDay.values.length; i++)
+            BarChartGroupData(
+              x: i,
+              barRods: [
+                BarChartRodData(
+                  toY: minutesByDay[WeekDay.values[i]]!.toDouble(),
+                  color: WeekDay.values[i] == today
+                      ? AppTheme.green
+                      : AppTheme.mint,
+                  width: 18,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ],
+            ),
+        ],
       ),
     );
   }
